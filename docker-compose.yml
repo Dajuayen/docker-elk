@@ -9,6 +9,7 @@ services:
         ELK_VERSION: $ELK_VERSION
     volumes:
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      # - ./volumes/elasticsearch/storage:/usr/share/elasticsearch/data:ro
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -50,7 +51,29 @@ services:
     depends_on:
       - elasticsearch
 
+  cerebro:
+    image: yannart/cerebro
+    ports:
+      - "9000:9000"
+    networks:
+      - elk
+
+  db:
+    image: postgres:${DB_VERSION}-alpine
+    environment:
+        POSTGRES_USER: "$DB_USER"
+        POSTGRES_PASSWORD: "$DB_PASSWORD"
+        POSTGRES_DB: "$DB_NAME"
+    volumes:
+        - db:/var/lib/postgresql/data:z
+    ports:
+        - "127.0.0.1:5432:5432"
+
 networks:
 
   elk:
     driver: bridge
+
+
+volumes:
+  db:
